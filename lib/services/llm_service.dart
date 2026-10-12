@@ -59,9 +59,12 @@ class LlmService extends GetxService {
   }
 
   /// Load a GGUF model from [path] with progress tracking.
-  Future<void> loadModel(String path) async {
+  Future<void> loadModel(String rawPath) async {
     LogService? log;
     try { log = Get.find<LogService>(); } catch (_) {}
+
+    // Ensure path is canonical and normalized across platforms (Windows backslashes / absolute)
+    final path = p.normalize(File(rawPath).absolute.path);
 
     // Verify file exists first
     final file = File(path);

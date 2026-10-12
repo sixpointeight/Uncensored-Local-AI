@@ -37,7 +37,7 @@ class ModelManager extends GetxService {
     if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
       try {
         final execDir = Platform.resolvedExecutable;
-        final usbShared = p.join(p.dirname(p.dirname(execDir)), 'Shared', 'models');
+        final usbShared = p.normalize(p.join(p.dirname(p.dirname(execDir)), 'Shared', 'models'));
         if (await Directory(usbShared).exists()) {
           return usbShared;
         }
@@ -48,7 +48,7 @@ class ModelManager extends GetxService {
 
     // Fall back to app documents
     final appDir = await getApplicationDocumentsDirectory();
-    final modelsDir = p.join(appDir.path, 'PortableAI', 'models');
+    final modelsDir = p.normalize(p.join(appDir.path, 'PortableAI', 'models'));
     await Directory(modelsDir).create(recursive: true);
     return modelsDir;
   }
@@ -92,15 +92,15 @@ class ModelManager extends GetxService {
 
     final files = await dir
         .list()
-        .where((f) => f is File && f.path.endsWith('.gguf'))
+        .where((f) => f is File && f.path.toLowerCase().endsWith('.gguf'))
         .map((f) => p.basename(f.path))
         .toList();
 
     downloadedModels.value = files;
   }
 
-  String getModelPath(AiModelInfo model) => p.join(_modelsDir, model.filename);
-  String getModelPathByFilename(String filename) => p.join(_modelsDir, filename);
+  String getModelPath(AiModelInfo model) => p.normalize(p.join(_modelsDir, model.filename));
+  String getModelPathByFilename(String filename) => p.normalize(p.join(_modelsDir, filename));
   bool isModelDownloaded(AiModelInfo model) => downloadedModels.contains(model.filename);
 
   /// Is this model currently downloading?
